@@ -1,51 +1,49 @@
 #include "host_handle.h"
-#include "wireless.h"
+#include "wireless_ESPNOW.h"
 
-extern uint8_t myMAC_Address[], Brodcast_Address[], Controller_Address[], TERMO_Address[];
-
+extern uint8_t myMAC_Address[], Brodcast_Address[];
+extern hc_message ESPNOW_mesg;
 hc_message hc_mesg;
 uint8_t hc_sendFlag = 0, hc_recvFlag = 0;
 
 void send_data_to_host(void)
-{
-    hc_mesg.begin_validator[0] = 'V';
-    hc_mesg.begin_validator[1] = 'A';
-    hc_mesg.begin_validator[2] = 'C';
-    hc_mesg.command = 0x02;
-    hc_mesg.data[0] = 1;
-    hc_mesg.data[1] = 1;
-    hc_mesg.data[2] = 1;
-    hc_mesg.data[3] = 1;
-    hc_mesg.end_validator = 'H';
-    
-    Serial2.write((const uint8_t *)&hc_mesg, sizeof(hc_mesg));  
+{   
+    Serial2.write((const uint8_t *)&ESPNOW_mesg, sizeof(ESPNOW_mesg));  
 }
 
 bool receive_data_from_host(void)
 {
-    uint8_t rxdata[16];
     if (Serial2.available()) 
     {
       char* rxdata = (char*) &hc_mesg;
-      Serial2.read(rxdata, 16);
-      Serial.print((char *)rxdata);
-      Serial.println(hc_mesg.data[0]);
+      Serial2.read(rxdata, sizeof(hc_mesg));
 
-      sendDataTo(Brodcast_Address, 0x07, hc_mesg.data);
+      Serial.println((char *)rxdata);
       return true;
     }
-     // delay(50);
-    // byte n = Serial2.available();  //3:
-    //  if(n != 0) //4:
-    //  {           
-    //      byte m = Serial.readBytesUntil('\n', rxdata, 5);  //5:
-    //      rxdata[m] = '\0';  //6:
-    //      Serial.print(String(rxdata)); Serial.println("rxdata");//7:
-    //  }
     return false;
 }
 
 void handle_host_message(void)
-{
+{   
+  if (hc_mesg.__hcdata == 4) // 4 = host: pair a device with reciever MAC Add
+  {
+    pairNew_device(hc_mesg.reciever_MAC_addr);
+  }
+  if (hc_mesg.__hcdata == 5) // 5 = host: unpair this device with reciever MAC Add if any
+  {
+    esp_now_del_peer(hc_mesg.reciever_MAC_addr);
+  }
 
+  if (hc_mesg.__hcdata == 6) // 6 = host: directly send this message to a device with reciever MAC Add
+  {
+    memcpy(hc_mesg.sender_MAC_addr, myMAC_Address, 6);
+    if (esp_now_send(hc_mesg.reciever_MAC_addr, (uint8_t *)&hc_mesg, sizeof(hc_mesg)) == ESP_OK)
+    {  
+      Serial.println("datasSent with success.");
+    }
+    hc_recvFlag = 0;
+  }
+
+   
 }
