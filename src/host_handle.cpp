@@ -9,6 +9,11 @@ uint8_t hc_sendFlag = 0, hc_recvFlag = 0;
 void send_data_to_host(void)
 {   
     Serial2.write((const uint8_t *)&ESPNOW_mesg, sizeof(ESPNOW_mesg));  
+    Serial.printf("Reciever Address is: %02X:%02X:%02X:%02X:%02X:%02X\n",
+          ESPNOW_mesg.reciever_MAC_addr[0], ESPNOW_mesg.reciever_MAC_addr[1], 
+          ESPNOW_mesg.reciever_MAC_addr[2], ESPNOW_mesg.reciever_MAC_addr[3], 
+          ESPNOW_mesg.reciever_MAC_addr[4], ESPNOW_mesg.reciever_MAC_addr[5]);
+    hc_sendFlag = 0;
 }
 
 bool receive_data_from_host(void)

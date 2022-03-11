@@ -41,9 +41,10 @@ void setup()
 
   ESPNOW_wireless_init();
 
-  Serial.printf("Controller MAC address is: %02X:%02X:%02X:%02X:%02X:%02X\n",
+  Serial.printf("My Controller MAC address is: %02X:%02X:%02X:%02X:%02X:%02X\n",
           myMAC_Address[0], myMAC_Address[1], myMAC_Address[2], myMAC_Address[3], myMAC_Address[4], myMAC_Address[5]);
   memcpy(ESPNOW_mesg.reciever_MAC_addr, myMAC_Address, 6);
+  memcpy(ESPNOW_mesg.sender_MAC_addr, myMAC_Address, 6);
   ESPNOW_mesg.__hcdata = 1; //introduce controller to host
   Serial2.write((const uint8_t *)&ESPNOW_mesg, sizeof(ESPNOW_mesg));
 }
