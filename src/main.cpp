@@ -65,10 +65,10 @@ void loop()
 {
   if (newData_flag_ESPNOW)
   {
-    ESPNOW_mesg.__hcdata = 3; // 3 = cont.: this is a message from a device (sender mac address)
     newData_flag_ESPNOW = false;
     delay(15); 
     //hc_sendFlag = 1;
+    ESPNOW_mesg.__hcdata = 3; // 3 = cont.: this is a message from a device (sender mac address)
     send_data_to_host();
   }
   delay(1);

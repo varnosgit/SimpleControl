@@ -65,7 +65,7 @@ void handle_host_message(void)
         esp_now_del_peer(hc_mesg.reciever_MAC_addr);
       }
 
-      else if (hc_mesg.__hcdata == 6) // 6 = host: directly send this message to a device with reciever MAC Add
+      else if (hc_mesg.__hcdata == 3) // 6 = host: directly send this message to a device with reciever MAC Add
       {
         Serial.println("sending data to a device...");
         memcpy(hc_mesg.sender_MAC_addr, myMAC_Address, 6);
