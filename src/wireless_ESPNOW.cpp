@@ -1,4 +1,5 @@
 #include "wireless_ESPNOW.h"
+#include "host_handle.h"
 
 bool newData_flag_ESPNOW =false;
 uint8_t myMAC_Address[] = {0xFF, 0xFF, 0xFF , 0xFF , 0xFF ,0xFF};
@@ -59,7 +60,18 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  Serial.printf("\r\n -------> Packet Send to:\t: %02X:%02X:%02X:%02X:%02X:%02X\n",
+  Serial.printf("\r\n -------> Packet Send from Controller to:\t: %02X:%02X:%02X:%02X:%02X:%02X\n",
           mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+
+  if (status == ESP_NOW_SEND_SUCCESS)
+  {
+    Serial.println("Delivery Success");
+  }
+  else
+  {
+    Serial.println("Delivery Failed!");
+    ESPNOW_mesg.__hcdata = 6; // 6 = cont.: delivery to device failed (dev mac = reciver mac address)
+    send_data_to_host();
+  }
+  // Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
